@@ -38,8 +38,11 @@
                 });
             }
 
-            // Attach click event listener to the "Load OpenAPI.yaml" button
+            // Click the "Load OpenAPI.yaml" button automatically after the window loads
             const loadButton = document.getElementById("load-openapi");
+            loadButton.click();
+            
+            // Attach click event listener to the "Load OpenAPI.yaml" button
             loadButton.addEventListener("click", loadSelectedOpenAPI);
         }
     </script>
