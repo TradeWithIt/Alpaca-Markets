@@ -1,15 +1,15 @@
 import OpenAPIRuntime
-import OpenAPIURLSession
+import OpenAPIAsyncHTTPClient
 import Foundation
 
 public struct Broker {
     public static let sandbox = Client(
         serverURL: URL(string: "https://broker-api.sandbox.alpaca.markets")!,
-        transport: URLSessionTransport()
+        transport: AsyncHTTPClientTransport()
     )
     
     public static let production = Client(
         serverURL: URL(string: "https://broker-api.alpaca.markets")!,
-        transport: URLSessionTransport()
+        transport: AsyncHTTPClientTransport()
     )
 }

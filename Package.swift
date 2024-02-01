@@ -16,35 +16,35 @@ let package = Package(
     dependencies: [
             .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
             .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-            .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
+            .package(url: "https://github.com/swift-server/swift-openapi-async-http-client", from: "1.0.0"),
         ],
     targets: [
         .target(
             name: "AlpacaBroker",
             dependencies: [
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
             ]
         ),
         .target(
             name: "AlpacaMarket",
             dependencies: [
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
             ]
         ),
         .target(
             name: "AlpacaOAuth",
             dependencies: [
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
             ]
         ),
         .target(
             name: "AlpacaTrading",
             dependencies: [
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+                .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
             ]
         ),
         
