@@ -27,7 +27,7 @@ Once you have your Swift package set up, adding a dependency is as easy as addin
 Add the package dependency in your Package.swift:
 ```
 dependencies: [
-    .package(url: "https://github.com/TradeWithIt/alpaca", from: "1.0.0")
+    .package(url: "https://github.com/TradeWithIt/Alpaca-Markets", from: "1.0.2")
 ]
 ```
 Next, in your target, add OpenAPIURLSession to your dependencies:
@@ -37,12 +37,72 @@ Next, in your target, add OpenAPIURLSession to your dependencies:
 ]),
 ```
 
+### Import any target you want to use:
+Open brokerage accounts, enable crypto and stock trading, and manage the ongoing user experience with Alpaca Broker API
+```
+import AlpacaBroker
+```
+Access Alpaca’s historical and real-time US stock market and crypto data through REST API and WebSocket. There are APIs for Stock Pricing, Crypto Pricing, and News.
+```
+import AlpacaMarket
+```
+The OAuth API allows you to request market data and manage portfolios on behalf of your end-users.
+
+For more information, visit [oauth-guide](https://alpaca.markets/docs/build-apps_services-with-alpaca/oauth-guide/.)
+```
+import AlpacaOAuth
+```
+Alpaca's Trading API is a modern platform for algorithmic trading.
+
+For complete documentation on the Trading API and to obtain your keys head to https://alpaca.markets/docs/api-documentation/api-v2/. Once you have your keys, head to the environments tab to quickly get started.
+```
+import AlpacaTrading
+```
+
+
 ## Usage 
+Set auth:
+```
+import AlpacaMarket
+
+
+Market.setSandboxApiKeys(
+    apiKey: "",
+    apiSecret: ""
+)
+```
 
 Example use:
 ```
+import AlpacaMarket
+
+
 do {
-    let result = try await Trading.sandbox.addAssetToWatchlist(path: .init(watchlist_id: ""))
+    let response = try await Market.sandbox.getBarsForStockSymbol(
+        .init(
+            path: .init(symbol: "AAPL"),
+            query: .init(timeframe: "1min")
+        )
+    )
+    
+    switch response {
+    case .ok(let okResponse):
+        // Switch over the response content type.
+        switch okResponse.body {
+        case .json(let bars):
+            // Print the greeting message.
+            print("👋 \(bars.symbol)")
+            print("👋 \(bars.next_page_token)")
+            let candles = bars.bars.map({ Candle(from: $0) })
+            await MainActor.run {
+                self.candles = candles
+            }
+        }
+    case .undocumented(statusCode: let statusCode, _):
+        // Handle HTTP response status codes not documented in the OpenAPI document.
+        print("🥺 undocumented response: \(statusCode)")
+    }
+    
 } catch {
     print(error)
 }
