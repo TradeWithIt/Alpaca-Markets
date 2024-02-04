@@ -4,43 +4,53 @@ import HTTPTypes
 import Foundation
 
 public struct Broker {
+    public enum Enviroment {
+        case sandbox, live
+        
+        var path: String {
+            switch self {
+            case .sandbox:
+                return "broker-api.sandbox"
+            case .live:
+                return "broker-api"
+            }
+        }
+    }
+    
     private static var shared: Broker = .init()
     
-    private var sandboxAuthMiddleware: AuthenticationMiddleware? = nil
-    private var productionAuthMiddleware: AuthenticationMiddleware? = nil
-    
-    private var sandboxClient: Client {
-        Client(
-            serverURL: URL(string: "https://broker-api.sandbox.alpaca.markets")!,
-            transport: AsyncHTTPClientTransport(),
-            middlewares: sandboxAuthMiddleware != nil ? [sandboxAuthMiddleware!] : []
-        )
+    private var authMiddleware: AuthenticationMiddleware? = nil
+    private var env: Enviroment = .sandbox
+    private var middlewares: [any ClientMiddleware] {
+        guard let authMiddleware else { return [] }
+        return [authMiddleware]
     }
 
-    private var productionClient: Client {
+    private var client: Client {
         Client(
-            serverURL: URL(string: "https://broker-api.alpaca.markets")!,
+            serverURL: URL(string: "https://\(env.path).alpaca.markets")!,
             transport: AsyncHTTPClientTransport(),
-            middlewares: productionAuthMiddleware != nil ? [productionAuthMiddleware!] : []
+            middlewares: middlewares
         )
     }
     
     // MARK: Public Access
     
-    public static var sandbox: Client {
-        shared.sandboxClient
+    public static var enviroment: Enviroment {
+        get {
+            shared.env
+        }
+        set {
+            shared.env = newValue
+        }
     }
     
-    public static var production: Client {
-        shared.productionClient
+    public static var client: Client {
+        shared.client
     }
     
-    public static func setSandboxBasicAuth(username: String, password: String) {
-        shared.sandboxAuthMiddleware = AuthenticationMiddleware(username: username, password: password)
-    }
-    
-    public static func setProductionBasicAuth(username: String, password: String) {
-        shared.productionAuthMiddleware = AuthenticationMiddleware(username: username, password: password)
+    public static func setApiKeys(username: String, password: String) {
+        shared.authMiddleware = AuthenticationMiddleware(username: username, password: password)
     }
 }
 

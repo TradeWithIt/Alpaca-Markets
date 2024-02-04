@@ -4,43 +4,53 @@ import HTTPTypes
 import Foundation
 
 public struct Trading {
+    public enum Enviroment {
+        case paper, live
+        
+        var path: String {
+            switch self {
+            case .paper:
+                return "paper-api"
+            case .live:
+                return "api"
+            }
+        }
+    }
+    
     private static var shared: Trading = .init()
     
-    private var sandboxAuthMiddleware: AuthenticationMiddleware? = nil
-    private var productionAuthMiddleware: AuthenticationMiddleware? = nil
-    
-    private var sandboxClient: Client {
-        Client(
-            serverURL: URL(string: "https://paper-api.alpaca.markets")!,
-            transport: AsyncHTTPClientTransport(),
-            middlewares: sandboxAuthMiddleware != nil ? [sandboxAuthMiddleware!] : []
-        )
+    private var authMiddleware: AuthenticationMiddleware? = nil
+    private var env: Enviroment = .paper
+    private var middlewares: [any ClientMiddleware] {
+        guard let authMiddleware else { return [] }
+        return [authMiddleware]
     }
 
-    private var productionClient: Client {
+    private var client: Client {
         Client(
-            serverURL: URL(string: "https://api.alpaca.markets")!,
+            serverURL: URL(string: "https://\(env.path).alpaca.markets")!,
             transport: AsyncHTTPClientTransport(),
-            middlewares: productionAuthMiddleware != nil ? [productionAuthMiddleware!] : []
+            middlewares: middlewares
         )
     }
     
     // MARK: Public Access
     
-    public static var sandbox: Client {
-        shared.sandboxClient
+    public static var enviroment: Enviroment {
+        get {
+            shared.env
+        }
+        set {
+            shared.env = newValue
+        }
     }
     
-    public static var production: Client {
-        shared.productionClient
+    public static var client: Client {
+        shared.client
     }
     
-    public static func setSandboxApiKeys(apiKey: String, apiSecret: String) {
-        shared.sandboxAuthMiddleware = AuthenticationMiddleware(apiKey: apiKey, apiSecret: apiSecret)
-    }
-    
-    public static func setProductionApiKeys(apiKey: String, apiSecret: String) {
-        shared.productionAuthMiddleware = AuthenticationMiddleware(apiKey: apiKey, apiSecret: apiSecret)
+    public static func setApiKeys(apiKey: String, apiSecret: String) {
+        shared.authMiddleware = AuthenticationMiddleware(apiKey: apiKey, apiSecret: apiSecret)
     }
 }
 
